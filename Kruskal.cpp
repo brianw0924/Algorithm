@@ -14,8 +14,8 @@ using namespace std;
 
 class Graph{
     public : 
-    int V;
-    vector<pair<int,pair<int,int> > > Edge;
+    int V; // vetex number
+    vector<pair<int,pair<int,int> > > Edge; // < weight, <vertex 1,vertex 2> >
     
     Graph(int n){this->V = n;}
     void Add_edge(int u,int v,int w);
@@ -24,23 +24,23 @@ class Graph{
 
 struct DisjointSet{
     int *parent,*rank,n;
-    DisjointSet(int n){// 初始化
+    DisjointSet(int n){// initialization
         this->n = n;
-        rank = new int[n+1];
+        rank = new int[n+1]; // vertex no. is 1~n
         parent = new int[n+1];
         for(int i=1;i<=n;i++){
-            parent[i] = i; // root 指向自己
-            rank[i] = 0;
+            parent[i] = i; // root points to itself
+            rank[i] = 0; // we use height as rank
         }
     }
 
-    int Find_Halving(int x) {
+    int Find_Halving(int x) { // similar to path compression
     while(parent[x] != x)
         x = parent[x] = parent[parent[x]];
     return x;
     }
 
-    void Union_by_rank(int x, int y){
+    void Union_by_rank(int x, int y){ // rank : tree height
         int rx = Find_Halving(x), ry = Find_Halving(y);
         if(rx == ry)
             return;
@@ -62,12 +62,12 @@ void Graph::Add_edge(int u, int v, int w){
 
 int Graph::Kruskal(){
     int MST_weight=0, edgeCount=0, E = this->V - 1;
-    sort(Edge.begin(),Edge.end());
+    sort(Edge.begin(),Edge.end()); // sort the edge by the weight
     vector<pair<int,pair<int,int> > >::iterator it=Edge.begin();
-    DisjointSet S(this->V);
-    while(edgeCount != E){
+    DisjointSet S(this->V); // to check if the coming edge will form cycle or not
+    while(edgeCount != E){ // in tree, E=V-1
         int u = S.Find_Halving(it->second.first), v = S.Find_Halving(it->second.second);
-        if(u!=v){
+        if(u!=v){ // these 2 vertices are not in same set, so it won't form cycle in MST
             S.Union_by_rank(u,v);
             MST_weight+=it->first;
             edgeCount++;

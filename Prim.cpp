@@ -13,6 +13,13 @@
 
 using namespace std;
 
+
+/* The trick in this priority queue is that 
+   the parameter given to decrease-key function is "vertex no."
+   However, in the priority queue, the index of the array 
+   won't be same as the vertex number, 
+   so we have to maintain another array to find the vertrx no. 
+   in priority queue in O(1) time */
 struct Priority_queue{
     int size;
     int *vertexIndex; // the index in priority queue is not same as the vertex no.
@@ -128,7 +135,7 @@ int  Graph::Prim(int start){
         inMST[u] = 1;
         for(vector<pair<int,int>>::iterator it = Adjlist[u].begin();it!=Adjlist[u].end();it++){
             int v = it->first, w = it->second;
-            if(!(inMST[v]) && key[v]>w){
+            if(!(inMST[v]) && key[v]>w){ // check if it's in MST and key > weight
                 pi[v] = u;
                 key[v] = w;
                 Q.Decrease_key(v,w);
