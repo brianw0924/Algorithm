@@ -3,6 +3,7 @@
 #include <vector>
 #include <queue>
 #include <set>
+#include <list>
 #include <map>
 #include <stack>
 #include <algorithm>
@@ -21,9 +22,9 @@ class Graph{
     public : 
     int V;
     int t; // for DFS discovery time
-    vector<int> T_sort;
+    list<int> T_sort;
     vector<vertex> Vertice;
-    vector<vector<int>> Adjlist;
+    vector<list<int>> Adjlist;
     
     Graph(int n){
         this->V = n;
@@ -36,6 +37,7 @@ class Graph{
     void BFS(int start);
     void DFS_visit(int u);
     void DFS(int start);
+    void SCC();
     void Topological_Sort(int start);
     int Diameter();
     void printGraph();
@@ -64,7 +66,7 @@ void Graph::BFS(int start){
     while(!Q.empty()){
         int u = Q.front();
         Q.pop();
-        for(vector<int>::iterator it = Adjlist[u].begin();it!=Adjlist[u].end();it++){
+        for(list<int>::iterator it = Adjlist[u].begin();it!=Adjlist[u].end();it++){
             if(Vertice[*it].color == 'W'){
                 Vertice[*it].distance = Vertice[u].distance + 1;
                 Vertice[*it].pi = u;
@@ -79,7 +81,7 @@ void Graph::DFS_visit(int u){
     t++;
     Vertice[u].discovery = t;
     Vertice[u].color = 'G';
-    for(vector<int>::iterator it = Adjlist[u].begin();it!=Adjlist[u].end();it++){
+    for(list<int>::iterator it = Adjlist[u].begin();it!=Adjlist[u].end();it++){
         if(Vertice[*it].color == 'W'){
             Vertice[*it].pi = u;
             DFS_visit(*it);
@@ -87,7 +89,7 @@ void Graph::DFS_visit(int u){
     }
     t++;
     Vertice[u].color = 'B';
-    T_sort.push_back(u); // Topological sort
+    T_sort.push_back(u); // for Topological sort & SCC
     Vertice[u].finish = t;
 }
 void Graph::DFS(int start){
@@ -104,11 +106,47 @@ void Graph::DFS(int start){
     this->t = 0;
 }
 
+void Graph::SCC(){
+    Graph RG(V); // Reverse Graph
+    for(int i=1;i<=V;i++){
+        RG.Vertice[i].number = i;
+        // in DFS, d is dicovery time;
+        RG.Vertice[i].pi = -1;
+        RG.Vertice[i].color = 'W';
+    }
+    for(int i=1;i<=V;i++){ // Reverse the Edges
+        for(list<int>::iterator it=Adjlist[i].begin();it!=Adjlist[i].end();it++){
+            RG.Adjlist[*it].push_back(i);
+        }
+    }
+
+    this->DFS(1); // In order to find the finish time in decreasing order
+    int c=0; // count how many SCC
+
+    /* DFS in Reverse Graph by selecting vertex in decreasing finish time */
+    for(list<int>::reverse_iterator it=this->T_sort.rbegin();it!=this->T_sort.rend();it++){
+        if(RG.Vertice[*it].color == 'W'){
+            c++;
+            RG.DFS_visit(*it); // every time we DFS (if valid, i.e color=='W') , we got a SCC set
+            printf("Strongly Connected Component set [%d] : ",c);
+            for(list<int>::iterator it=RG.T_sort.begin(), end=RG.T_sort.end();it!=end;it=RG.T_sort.erase(it)){
+                printf("%d ",*it);
+            }
+            printf("\n");
+        }
+    }
+}
+
+
 void Graph::Topological_Sort(int start){
     DFS(start);
-    for(int i=V-1;i>0;i--)
-        printf("%d -> ",T_sort[i]);
-    printf("%d\n",T_sort[0]);
+    list<int>::iterator re = T_sort.begin(), rb = --T_sort.end();
+    for(list<int>::iterator it = rb;it!=re;it--){
+        printf("%d -> ",*it);
+        T_sort.erase(it);
+    }
+    printf("%d\n",*T_sort.begin());
+    T_sort.erase(T_sort.begin());
 }
 
 
@@ -135,7 +173,7 @@ int Graph::Diameter(){
 void Graph::printGraph(){
     for(int i=1;i<=V;i++){
         printf("Adj[%d] : ",i);
-        for(vector<int>::iterator it = Adjlist[i].begin();it!=Adjlist[i].end();it++){
+        for(list<int>::iterator it = Adjlist[i].begin();it!=Adjlist[i].end();it++){
             printf("%d ",*it);
         }
         printf("\n");
@@ -148,7 +186,7 @@ int main(){
     Graph G(V);
     int u,v;
     while(cin >> u >> v){
-        G.addEdge_directed(u,v);
+        G.addEdge_directed(u,v); // or undirected
     }
     return 0;
 }
