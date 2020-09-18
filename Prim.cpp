@@ -128,8 +128,10 @@ void Graph::Add_edge(int u, int v, int w){
 
 int  Graph::Prim(int start){
     int MST_weight=0;
-    key[start] = 0;
+    // key[start] = 0;
     Priority_queue Q(this->V, this->key);
+    Q.Decrease_key(start,0);
+
     while(!Q.Empty()){
         int u = Q.Extract_min();
         inMST[u] = 1;
@@ -157,6 +159,9 @@ int main(){
         G.Add_edge(u,v,w);
     }
     printf("%d\n",G.Prim(1));
+    printf("%d\n",G.Prim(2));
+    printf("%d\n",G.Prim(3));
+    printf("%d\n",G.Prim(4));
     
     return 0;
 }
