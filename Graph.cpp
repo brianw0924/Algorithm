@@ -89,11 +89,6 @@ struct Priority_queue{
         Heapify(1);
         return min;
     }
-
-    void printQueue(){
-        for(int i=1;i<=5;i++)
-            printf("%d\n",pq[i].first);
-    }
 };
 
 struct vertex{
